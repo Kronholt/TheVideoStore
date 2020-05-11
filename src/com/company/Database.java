@@ -11,7 +11,7 @@ class Database {
     //This method is used by other methods of the Database class to perform CRUD operations to the movie database
     private Connection connect(){
         Connection conn = null;
-        String url = "jdbc:sqlite:/Users/keganronholt/movie_store.db";
+        String url = "jdbc:sqlite:/Users/keganronholt/IdeaProjects/TheVideoStore/movie_store.db";
         try {
             conn = DriverManager.getConnection(url);
 
@@ -178,6 +178,30 @@ class Database {
             System.out.println(e.getMessage());
         }
         return movies;
+    }
+
+    public Customer getCustomer(String fullName, String phone){
+        Customer customer = new Customer();
+        String sql = "SELECT * FROM customers WHERE '" + fullName + "' LIKE fname ||' '|| lname AND '" + phone + "' = phone";
+        try(Connection conn = this.connect()){
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            while (rs.next()) {
+                customer.setCustomerId(rs.getInt("customer_id"));
+                customer.setFirstName(rs.getString("fname"));
+                customer.setLastName(rs.getString("lname"));
+                customer.setPhone(rs.getString("phone"));
+                customer.setEmail(rs.getString("email"));
+                customer.setAddress(rs.getString("address"));
+                customer.setCity(rs.getString("city"));
+                customer.setState(rs.getString("state"));
+                customer.setZip(rs.getString("zip"));
+            }
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return customer;
     }
 
     //queries the customers table, sets the fields of customer object and adds to arraylist of Customer

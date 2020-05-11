@@ -26,6 +26,7 @@ public class Main {
             switch(choice){
                 case "1":
                     //rentMovie();
+                    printMovies();
                     break;
 
                 case "2":
@@ -46,12 +47,12 @@ public class Main {
                     break;
 
                 case "6":
-                    //searchCustomer();
+                    searchCustomer();
 
                     break;
 
                 case "7":
-                    //newCustomer();
+                    newCustomer();
                     break;
 
                 case "8":
@@ -108,6 +109,48 @@ public class Main {
         }
     }
 
+    public static void searchCustomer(){
+        System.out.println("Please enter customer's full name: ");
+        String name = s.nextLine();
+        System.out.println("Please enter customer's phone number: ");
+        String phone = s.nextLine();
+        Customer customer = db.getCustomer(name, phone);
+        System.out.println(customer);
+
+
+    }
+
+    //allows the user to add a new movie to the database if it does not already exist.
+    public static void newMovie(){
+        System.out.println("Enter movie title: ");
+        String title = s.nextLine();
+        System.out.println("Enter description: ");
+        String description = s.nextLine();
+        String rating = s.nextLine();
+        String category = s.nextLine();
+        String release_date = s.nextLine();
+
+        if(db.addMovie(title,description,rating,category,release_date)){
+            createStarBillings(title);
+
+        }
+
+    }
+
+    //used by the newMovie method to add actors that starred in the new film entered
+    public static void newActor(){
+        Actor actor = new Actor();
+        System.out.println("Enter stage name: ");
+        String stageName = s.nextLine();
+        System.out.println("Enter first name: ");
+        String fname = s.nextLine();
+        System.out.println("Enter last name: ");
+        String lname = s.nextLine();
+        System.out.println("Enter birthdate: ");
+        String birthDate = s.nextLine();
+        db.addActor(stageName, fname,lname,birthDate);
+    }
+    //is called when an actor is added to a movie, this tracks which actors are in which films.
     public static void createStarBillings(String title){
         boolean quit = false;
         while(!quit){
@@ -126,34 +169,6 @@ public class Main {
 
 
         }
-    }
-    public static void newMovie(){
-        System.out.println("Enter movie title: ");
-        String title = s.nextLine();
-        System.out.println("Enter description: ");
-        String description = s.nextLine();
-        String rating = s.nextLine();
-        String category = s.nextLine();
-        String release_date = s.nextLine();
-
-        if(db.addMovie(title,description,rating,category,release_date)){
-            createStarBillings(title);
-
-        }
-
-    }
-
-    public static void newActor(){
-        Actor actor = new Actor();
-        System.out.println("Enter stage name: ");
-        String stageName = s.nextLine();
-        System.out.println("Enter first name: ");
-        String fname = s.nextLine();
-        System.out.println("Enter last name: ");
-        String lname = s.nextLine();
-        System.out.println("Enter birthdate: ");
-        String birthDate = s.nextLine();
-        db.addActor(stageName, fname,lname,birthDate);
     }
 
     //Method used to enter a new customer into the database
@@ -228,4 +243,7 @@ public class Main {
         db.addCustomer("Sam","Jenkins","715-222-3040", "540 Rockwood",
                 "Green Bay", "Wisconsin", "54453", "ripley@gmail.com");
     }
+
+
+
 }
