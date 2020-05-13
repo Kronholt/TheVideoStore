@@ -128,7 +128,7 @@ class Database {
 
     //returns a single movie from the database using title to search
     public Movie getMovie(String title){
-        String sql = "SELECT * FROM movies WHERE title = '" + title + "'";
+        String sql = "SELECT * FROM movies WHERE UPPER(title) = '" + title.toUpperCase() + "'";
         Movie movie = new Movie();
 
         try(Connection conn = this.connect()){
@@ -155,6 +155,186 @@ class Database {
     //queries the movies table and returns the values which are built into Movie objects and sent back in an arrayList
     public ArrayList<Movie> getMovies(){
         String sql = "SELECT * FROM movies";
+
+        ArrayList<Movie> movies = new ArrayList<>();
+        try(Connection conn = this.connect()){
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            //looks in the resultSet and sets the values for each field in movie object
+            while(rs.next()){
+                Movie movie = new Movie();
+                movie.setMovie_id(rs.getInt("movie_id"));
+                movie.setTitle(rs.getString("title"));
+                movie.setDescription(rs.getString("description"));
+                movie.setRating(rs.getString("rating"));
+                movie.setCategory(rs.getString("category"));
+                movie.setRelease_date(rs.getString("release_date"));
+
+                movies.add(movie);
+            }
+
+        } catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return movies;
+    }
+
+    public ArrayList<Movie> getMoviesByGenre(String genre){
+        String sql = "SELECT * FROM movies WHERE UPPER(category) = '" + genre.toUpperCase() + "'";
+
+        ArrayList<Movie> movies = new ArrayList<>();
+        try(Connection conn = this.connect()){
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            //looks in the resultSet and sets the values for each field in movie object
+            while(rs.next()){
+                Movie movie = new Movie();
+                movie.setMovie_id(rs.getInt("movie_id"));
+                movie.setTitle(rs.getString("title"));
+                movie.setDescription(rs.getString("description"));
+                movie.setRating(rs.getString("rating"));
+                movie.setCategory(rs.getString("category"));
+                movie.setRelease_date(rs.getString("release_date"));
+
+                movies.add(movie);
+            }
+
+        } catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return movies;
+    }
+
+    public boolean returnMovie(int movie_id, String type, String date){
+
+        if(this.movieIsAvailable(movie_id, type)){
+            return false;
+        }
+
+        String sql = "UPDATE rental_history SET return_date = '" + date +
+                "' WHERE media_id = (SELECT media_id FROM media WHERE title_id = " + movie_id +
+                " AND format = '" + type + "');";
+
+        try(Connection conn = this.connect()){
+            Statement stmt = conn.createStatement();
+            stmt.execute(sql);
+            System.out.println("Movie returned.");
+            return true;
+
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+            System.out.println("Return incomplete.");
+        }
+
+        return false;
+
+    }
+
+    public String rentMovie(int movie_id, String type, int customer_id, String rental_date){
+
+        try(Connection conn = this.connect()){
+            int media_id = 0;
+            if(movieIsAvailable(movie_id, type)) {
+                String findMediaNumber = "SELECT media_id FROM media JOIN movies ON(movie_id = title_id) WHERE title_id = " + movie_id +
+                        " AND format = '" + type + "';";
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(findMediaNumber);
+                while (rs.next()) {
+                    media_id = rs.getInt("media_id");
+                }
+
+                String insertRentalHistory = "INSERT INTO rental_history (media_id, rental_date, customer_id) VALUES (" + media_id +
+                        ", '" + rental_date + "' , " + customer_id + ");";
+
+                stmt.execute(insertRentalHistory);
+            }
+            else{
+                System.out.println("Movie is unavailable.");
+            }
+
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+
+        return "";
+    }
+
+
+    public boolean movieIsAvailable(int movieId, String format){
+        String sql = "SELECT * FROM unavailable_movies WHERE movie_id = " + movieId +
+                " AND format ='"+ format + "';";
+
+        String movieFoundTitle = "";
+
+        try(Connection conn = this.connect()){
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            movieFoundTitle = rs.getString("movie_title");
+            if(movieFoundTitle.equals("")){
+                return true;
+            }
+            return false;
+        }catch (SQLException e){
+
+        }
+
+        return true;
+    }
+
+
+    public void customerRecord(String fname, String lname){
+        String sql = "SELECT movie_id, title, rental_date, fname ||' '|| lname, format FROM " +
+                " rental_history JOIN media USING(media_id) JOIN customers using(customer_id) " +
+                "JOIN movies ON(title_id = movie_id) WHERE fname = '" + fname + "' AND lname = '" +
+                lname + "';";
+
+        try(Connection conn = this.connect()){
+
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            while(rs.next()){
+                System.out.println("********");
+                System.out.println("Movie id: " + rs.getString("movie_id"));
+                System.out.println("Title: " + rs.getString("title"));
+                System.out.println("Format: " + rs.getString("format"));
+                System.out.println("Rental Date: " + rs.getString("rental_date"));
+                System.out.println("********");
+            }
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void printRentedMovie(){
+
+        String sql = "SELECT * FROM unavailable_movies;";
+
+        try(Connection conn = this.connect()){
+
+            Statement stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            while(rs.next()){
+                System.out.println("**************");
+                System.out.println("Movie id: " + rs.getInt("movie_id"));
+                System.out.println("Title: " + rs.getString("movie_title"));
+                System.out.println("Format: " + rs.getString("format"));
+                System.out.println("Rental Date: " + rs.getString("rental_date"));
+                System.out.println("Customer name: " + rs.getString("ccustomer_name"));
+                System.out.println("**************");
+
+            }
+
+        }catch(SQLException e){
+
+            System.out.println(e.getMessage());
+        }
+    }
+
+
+    public ArrayList<Movie> getMoviesByActor(String actor){
+        String sql = "SELECT * FROM movies JOIN star_billings USING(movie_id) JOIN actors USING(actor_id) WHERE UPPER(stage_name) = '" + actor.toUpperCase() + "'";
 
         ArrayList<Movie> movies = new ArrayList<>();
         try(Connection conn = this.connect()){

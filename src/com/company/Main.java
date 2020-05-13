@@ -1,5 +1,6 @@
 package com.company;
 
+
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -25,30 +26,61 @@ public class Main {
             String choice = s.nextLine();
             switch(choice){
                 case "1":
-                    //rentMovie();
-                    printMovies();
+                    System.out.println("Enter movie number: ");
+                    int movieNumber = s.nextInt();
+                    s.nextLine();
+                    System.out.println("Enter movie type (DVD/VHS): ");
+                    String type = s.nextLine();
+                    System.out.println("Enter customers full name: ");
+                    String name = s.nextLine();
+                    System.out.println("Enter phone number: ");
+                    String phone = s.nextLine();
+                    System.out.println("Enter date: ");
+                    String date = s.nextLine();
+
+                    int customer_id = getCustomerId(name, phone);
+
+                    //ended here - working on getting current date
+                    rentMovie(movieNumber, type, customer_id, date);
+
                     break;
 
                 case "2":
-                    //returnMovie();
+                    System.out.println("Enter movie number: ");
+                    int movieNum = s.nextInt();
+                    s.nextLine();
+                    System.out.println("DVD or VHS? ");
+                    type = s.nextLine();
+                    System.out.println("Enter date: ");
+                    date = s.nextLine();
+                    db.returnMovie(movieNum, type, date);
                     break;
 
                 case "3":
-                    //searchMovie();
+                    System.out.println("Enter movie title: ");
+                    String title = s.nextLine();
+                    printMovieByTitle(title);
                     break;
 
                 case "4":
-                    //searchByActor();
+                    System.out.println("Enter actor name: ");
+                    String actorName = s.nextLine();
+                    printMoviesByActor(actorName);
                     break;
 
                 case "5":
-                    //searchGenre();
+                    System.out.println("Enter Genre of movie (Action, Animation, Drama): ");
+                    String genre = s.nextLine();
+                    printMoviesByGenre((genre));
 
                     break;
 
                 case "6":
-                    searchCustomer();
-
+                    System.out.println("Please enter customer's full name: ");
+                    name = s.nextLine();
+                    System.out.println("Please enter customer's phone number: ");
+                    phone = s.nextLine();
+                    searchCustomer(name, phone);
                     break;
 
                 case "7":
@@ -57,13 +89,23 @@ public class Main {
 
                 case "8":
                     newMovie();
-
                     break;
 
-            case "9":
-                quit = true;
+                case "9":
+                    db.printRentedMovie();
 
                 break;
+
+                case "10":
+                    System.out.println("Enter Customer's first name: ");
+                    String first = s.nextLine();
+                    System.out.println("Enter Customer's last name: ");
+                    String last = s.nextLine();
+                    db.customerRecord(first, last);
+                    break;
+                case "0":
+                    quit = true;
+                    break;
 
             default:
                 System.out.println("Invalid choice please try again.");
@@ -78,14 +120,17 @@ public class Main {
     }
 
     public static void printMenu(){
+        System.out.println("------Type 0 to exit------");
         System.out.println("1. Rent Movie");
         System.out.println("2. Return Movie");
-        System.out.println("3. Look up movie");
+        System.out.println("3. Look up movie by title");
         System.out.println("4. Look up movies by actor");
         System.out.println("5. Look up movies by Genre");
         System.out.println("6. Look up customer");
         System.out.println("7. New Customer");
         System.out.println("8. Add new movie");
+        System.out.println("9. Print checked out movies movies");
+        System.out.println("10. Print customer rental record");
         System.out.println("Please enter choice: ");
     }
 
@@ -93,11 +138,27 @@ public class Main {
 
 
     //method receives an arrayList of type Customer from the Database class and uses foreach loop to print to screen
-
     public static void printCustomers(){
         ArrayList<Customer> customerList = db.getCustomers();
         for(Customer c: customerList){
             System.out.println(c);
+        }
+    }
+
+    public static void rentMovie(int movieID, String type, int customerId, String rentalDate){
+        db.rentMovie(movieID, type, customerId, rentalDate);
+    }
+
+    public static void printMovieByTitle(String title){
+        Movie movie = db.getMovie(title);
+        System.out.println(movie);
+    }
+
+
+    public static void printMoviesByActor(String stageName){
+        ArrayList<Movie> movieList = db.getMoviesByActor(stageName);
+        for(Movie m: movieList){
+            System.out.println(m);
         }
     }
 
@@ -109,13 +170,26 @@ public class Main {
         }
     }
 
-    public static void searchCustomer(){
-        System.out.println("Please enter customer's full name: ");
-        String name = s.nextLine();
-        System.out.println("Please enter customer's phone number: ");
-        String phone = s.nextLine();
+    public static void printMoviesByGenre(String genre){
+        ArrayList<Movie> movieList = db.getMoviesByGenre(genre);
+        for(Movie m: movieList){
+            System.out.println(m);
+        }
+    }
+
+    public static int searchCustomer(String name, String phone){
+
         Customer customer = db.getCustomer(name, phone);
         System.out.println(customer);
+        return customer.getCustomerId();
+
+
+    }
+
+    public static int getCustomerId(String name, String phone){
+
+        Customer customer = db.getCustomer(name, phone);
+        return customer.getCustomerId();
 
 
     }
@@ -150,6 +224,7 @@ public class Main {
         String birthDate = s.nextLine();
         db.addActor(stageName, fname,lname,birthDate);
     }
+
     //is called when an actor is added to a movie, this tracks which actors are in which films.
     public static void createStarBillings(String title){
         boolean quit = false;
