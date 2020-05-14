@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 
+//bug found add movie crashed after entering description
 
 
 public class Main {
@@ -103,6 +104,9 @@ public class Main {
                     String last = s.nextLine();
                     db.customerRecord(first, last);
                     break;
+                case "11":
+                    printMovies();
+                    break;
                 case "0":
                     quit = true;
                     break;
@@ -131,6 +135,7 @@ public class Main {
         System.out.println("8. Add new movie");
         System.out.println("9. Print checked out movies movies");
         System.out.println("10. Print customer rental record");
+        System.out.println("11. Print list of movies");
         System.out.println("Please enter choice: ");
     }
 
@@ -200,8 +205,11 @@ public class Main {
         String title = s.nextLine();
         System.out.println("Enter description: ");
         String description = s.nextLine();
+        System.out.println("Enter rating (G/PG/PG-13/R): ");
         String rating = s.nextLine();
+        System.out.println("Enter category (Action/Drama/Animation): ");
         String category = s.nextLine();
+        System.out.println("Enter release date: ");
         String release_date = s.nextLine();
 
         if(db.addMovie(title,description,rating,category,release_date)){
@@ -229,6 +237,7 @@ public class Main {
     public static void createStarBillings(String title){
         boolean quit = false;
         while(!quit){
+            System.out.println("Add actors that starred in this film.");
             System.out.println("Enter exit to stop entering actor names.");
             System.out.println("Enter actor name: ");
             String stageName = s.nextLine();
@@ -236,7 +245,7 @@ public class Main {
                 quit = true;
 
             }
-            if (db.getActor(stageName) == null){
+            if (db.getActor(stageName).getFname() == null && !quit){
                 System.out.println("Actor not found, please enter information.");
                 newActor();
             }

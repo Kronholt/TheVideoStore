@@ -67,6 +67,7 @@ class Database {
         return true;
     }
 
+    //executes the insert statement, adding a new row to the actors table
     public boolean addActor(String stageName, String fname, String lname, String birth_date){
         String sql = "INSERT INTO actors (stage_name, fname, lname, birth_date) VALUES (?,?,?,?)";
 
@@ -85,6 +86,7 @@ class Database {
         return true;
     }
 
+    //This is called when a new movie and actor are entered, this associates actors to the films they star in
     public void addStar_billings(String movieTitle, String actorName){
         Movie movie = getMovie(movieTitle);
         Actor actor = getActor(actorName);
@@ -180,6 +182,7 @@ class Database {
         return movies;
     }
 
+    //returns all the films by genre
     public ArrayList<Movie> getMoviesByGenre(String genre){
         String sql = "SELECT * FROM movies WHERE UPPER(category) = '" + genre.toUpperCase() + "'";
 
@@ -207,8 +210,10 @@ class Database {
         return movies;
     }
 
+    //This function facilitates returning checked out movies
     public boolean returnMovie(int movie_id, String type, String date){
 
+        //checks if movie is in the unavailable (checked out) list. If it is not, it cannot be returned
         if(this.movieIsAvailable(movie_id, type)){
             return false;
         }
@@ -232,10 +237,12 @@ class Database {
 
     }
 
+    //This method facilitates the rental of a movie
     public String rentMovie(int movie_id, String type, int customer_id, String rental_date){
 
         try(Connection conn = this.connect()){
             int media_id = 0;
+            //if the movie is not currently checked out, gets the media_id to insert the new row into rental_history
             if(movieIsAvailable(movie_id, type)) {
                 String findMediaNumber = "SELECT media_id FROM media JOIN movies ON(movie_id = title_id) WHERE title_id = " + movie_id +
                         " AND format = '" + type + "';";
@@ -262,8 +269,9 @@ class Database {
     }
 
 
+    //This method checks the view unavailable_movies (which stores rental_history rows with not return date (currently checked out)
     public boolean movieIsAvailable(int movieId, String format){
-        String sql = "SELECT * FROM unavailable_movies WHERE movie_id = " + movieId +
+        String sql = "SELECT movie_title FROM unavailable_movies WHERE movie_id = " + movieId +
                 " AND format ='"+ format + "';";
 
         String movieFoundTitle = "";
@@ -283,9 +291,9 @@ class Database {
         return true;
     }
 
-
+    //returns the entire rental record for a customer
     public void customerRecord(String fname, String lname){
-        String sql = "SELECT movie_id, title, rental_date, fname ||' '|| lname, format FROM " +
+        String sql = "SELECT movie_id, title, rental_date, return_date, fname ||' '|| lname, format FROM " +
                 " rental_history JOIN media USING(media_id) JOIN customers using(customer_id) " +
                 "JOIN movies ON(title_id = movie_id) WHERE fname = '" + fname + "' AND lname = '" +
                 lname + "';";
@@ -300,13 +308,14 @@ class Database {
                 System.out.println("Title: " + rs.getString("title"));
                 System.out.println("Format: " + rs.getString("format"));
                 System.out.println("Rental Date: " + rs.getString("rental_date"));
+                System.out.println("Return Date: " + rs.getString("return_date"));
                 System.out.println("********");
             }
         }catch (SQLException e){
             System.out.println(e.getMessage());
         }
     }
-
+    //prints the view that tracks all currently checked out films
     public void printRentedMovie(){
 
         String sql = "SELECT * FROM unavailable_movies;";
@@ -332,7 +341,7 @@ class Database {
         }
     }
 
-
+    //allows user to search for films containing a specific actor
     public ArrayList<Movie> getMoviesByActor(String actor){
         String sql = "SELECT * FROM movies JOIN star_billings USING(movie_id) JOIN actors USING(actor_id) WHERE UPPER(stage_name) = '" + actor.toUpperCase() + "'";
 
@@ -360,6 +369,7 @@ class Database {
         return movies;
     }
 
+    //returns the information of a customer
     public Customer getCustomer(String fullName, String phone){
         Customer customer = new Customer();
         String sql = "SELECT * FROM customers WHERE '" + fullName + "' LIKE fname ||' '|| lname AND '" + phone + "' = phone";
