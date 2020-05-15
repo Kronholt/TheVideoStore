@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 
-//bug found add movie crashed after entering description
+//bug found on movies added - they were not added to media and therefore cannot be rented
 
 
 public class Main {
@@ -98,15 +98,27 @@ public class Main {
                 break;
 
                 case "10":
-                    System.out.println("Enter Customer's first name: ");
-                    String first = s.nextLine();
-                    System.out.println("Enter Customer's last name: ");
-                    String last = s.nextLine();
-                    db.customerRecord(first, last);
+                    System.out.println("Enter Customer's full name: ");
+                    String fullName = s.nextLine();
+                    db.customerRecord(fullName);
                     break;
                 case "11":
                     printMovies();
                     break;
+                case "12":
+                    System.out.println("Enter Customer full name: ");
+                    fullName = s.nextLine();
+                    System.out.println("Enter Customer's phone number: ");
+                    phone = s.nextLine();
+                    db.deleteCustomer(fullName, phone);
+                    break;
+
+                case "13":
+                    System.out.println("Enter movie title to delete: ");
+                    title = s.nextLine();
+                    db.deleteMovie(title);
+                    break;
+
                 case "0":
                     quit = true;
                     break;
@@ -136,6 +148,8 @@ public class Main {
         System.out.println("9. Print checked out movies movies");
         System.out.println("10. Print customer rental record");
         System.out.println("11. Print list of movies");
+        System.out.println("12. Delete Customer. ");
+        System.out.println("13. Delete movie. ");
         System.out.println("Please enter choice: ");
     }
 

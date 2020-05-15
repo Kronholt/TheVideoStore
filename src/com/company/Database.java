@@ -292,11 +292,10 @@ class Database {
     }
 
     //returns the entire rental record for a customer
-    public void customerRecord(String fname, String lname){
+    public void customerRecord(String fullName){
         String sql = "SELECT movie_id, title, rental_date, return_date, fname ||' '|| lname, format FROM " +
                 " rental_history JOIN media USING(media_id) JOIN customers using(customer_id) " +
-                "JOIN movies ON(title_id = movie_id) WHERE fname = '" + fname + "' AND lname = '" +
-                lname + "';";
+                "JOIN movies ON(title_id = movie_id) WHERE UPPER(fname ||' '|| lname) = '" + fullName.toUpperCase() + "';";
 
         try(Connection conn = this.connect()){
 
@@ -423,5 +422,39 @@ class Database {
         }
         return customers;
     }
+
+    public boolean deleteCustomer(String fullName, String phone){
+       String sql = "DELETE FROM customers WHERE UPPER(fname ||' '|| lname) = '" + fullName.toUpperCase() + "' AND phone = '" + phone +
+               "';";
+
+       try(Connection conn = this.connect()){
+           Statement stmt = conn.createStatement();
+           stmt.execute(sql);
+           System.out.println("Record Deleted");
+           return true;
+
+       }catch (SQLException e){
+           System.out.println(e.getMessage());
+           System.out.println("Problem occurred, not deleted.");
+       }
+        return false;
+    }
+
+    public boolean deleteMovie(String title){
+        String sql = "DELETE FROM movies WHERE UPPER(title) = '" + title.toUpperCase() + "';";
+
+        try(Connection conn = this.connect()){
+            Statement stmt = conn.createStatement();
+            stmt.execute(sql);
+            System.out.println("Movie deleted.");
+            return true;
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+            System.out.println("Error occurred movie not deleted. ");
+        }
+        return false;
+    }
+
+
 
 }
