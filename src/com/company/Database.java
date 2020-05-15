@@ -49,7 +49,7 @@ class Database {
     }
 
     //Receives movie information and uses prepared sql statement to insert into the database
-    public boolean addMovie(String title, String description, String rating, String category, String release_date){
+    public boolean addMovie(String title, String description, String rating, String category, String release_date, String format){
         String sql = "INSERT INTO movies (title,description,rating,category,release_date) VALUES (?,?,?,?,?)";
 
         try(Connection conn = this.connect()){
@@ -60,11 +60,32 @@ class Database {
             pstmt.setString(4, category);
             pstmt.setString(5, release_date);
             pstmt.executeUpdate();
+            addMedia(title, format);
         }catch (SQLException e){
             System.out.println(e.getMessage());
             return false;
         }
         return true;
+    }
+
+    public void addMedia(String title, String format){
+        int movieId = this.getMovie(title).getMovie_id();
+        String insertMedia;
+        if(!format.toLowerCase().equals("both")){
+            insertMedia = "INSERT INTO media (format, title_id) VALUES('" +
+                    format + "', " + movieId;
+        } else{
+            insertMedia = "INSERT INTO media(format, title_id) VALUES " +
+            "('DVD', " + movieId + "), " +
+            "('VHS', " + movieId + ");";
+        }
+
+        try(Connection conn = this.connect()){
+            Statement stmt = conn.createStatement();
+            stmt.execute(insertMedia);
+        } catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
     }
 
     //executes the insert statement, adding a new row to the actors table
@@ -307,7 +328,12 @@ class Database {
                 System.out.println("Title: " + rs.getString("title"));
                 System.out.println("Format: " + rs.getString("format"));
                 System.out.println("Rental Date: " + rs.getString("rental_date"));
-                System.out.println("Return Date: " + rs.getString("return_date"));
+                String return_date = rs.getString("return_date");
+                if(return_date == null){
+                    System.out.println("Return Date: Not Returned");
+                }else{
+                    System.out.println("Return Date: " + return_date);
+                }
                 System.out.println("********");
             }
         }catch (SQLException e){
@@ -423,6 +449,7 @@ class Database {
         return customers;
     }
 
+    //removes a customer from the database
     public boolean deleteCustomer(String fullName, String phone){
        String sql = "DELETE FROM customers WHERE UPPER(fname ||' '|| lname) = '" + fullName.toUpperCase() + "' AND phone = '" + phone +
                "';";
@@ -440,12 +467,17 @@ class Database {
         return false;
     }
 
+
+    //Deletes a movie and the media types associated with this movie from the database
     public boolean deleteMovie(String title){
         String sql = "DELETE FROM movies WHERE UPPER(title) = '" + title.toUpperCase() + "';";
 
+        int movieId = getMovie(title).getMovie_id();
+        String deleteMedia = "DELETE FROM media WHERE title_id = " + movieId;
         try(Connection conn = this.connect()){
             Statement stmt = conn.createStatement();
             stmt.execute(sql);
+            stmt.execute(deleteMedia);
             System.out.println("Movie deleted.");
             return true;
         }catch (SQLException e){
