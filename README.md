@@ -4,8 +4,8 @@ This program tested and improved my knowledge of SQL databases.
 I originally designed and developed a video store database for a college class, but did not learn how to interact with a DB from java.
 
 Work on the Database:
-The database built in oracle sql for my class, but wanted I to work with sqlite3. 
-I transferred the knowledge of concepts of built the database from the ground up.
+The database was built in oracle sql for my class, but wanted I to work with sqlite3. 
+I transferred the knowledge of concepts of built the database from the ground up, using resources like w3schools and sqlitetutorial to learn the syntax of sqlite3. 
 I learned how to implement tables, views, and constraints in sqlite3.
 
 
