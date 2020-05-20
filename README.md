@@ -14,6 +14,8 @@ Work on the Java program:
 
 Using stackoverflow and similar resources I was able to learn how to execute sql statements in java and interact with the database. 
 
+I implemented a menu, and methods to send and receive information with the database class so that CRUD operations could be performed. 
+
 The biggest challenge was managing how movies were rented and returned (checking that a movie was not already checked out before allowing rental). 
 This was achieved by creating a view that only included rental records for customers that had a null value for return date.
 The user is unable to rent movies contained in the unavailable_movies view. 
